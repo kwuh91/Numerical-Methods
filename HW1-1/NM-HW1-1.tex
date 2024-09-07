@@ -1,0 +1,189 @@
+\documentclass[a4paper, 12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[paper=a4paper, left=10mm, right=10mm, top=20mm, bottom=20mm]{geometry}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage[T2A]{fontenc}
+\usepackage{textcomp}
+\usepackage{parskip}
+
+\linespread{1}
+
+\begin{document}
+
+% титульник
+
+\pagestyle{empty}
+
+\section*{\centering{ \large МИНИСТЕРСТВО ОБРАЗОВАНИЯ И НАУКИ РОССИЙСКОЙ ФЕДЕРАЦИИ ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ ОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ ВЫСШЕГО ПРОФЕССИОНАЛЬНОГО ОБРАЗОВАНИЯ}}
+
+\vspace{3\baselineskip}
+
+\section*{\centering{ \large «Московский государственный технический университет имени Н.Э. Баумана» (МГТУ им. Н.Э. Баумана)}}
+
+\vspace{3\baselineskip}
+
+\section*{\centering{ \large ФАКУЛЬТЕТ ФУНДАМЕНТАЛЬНЫЕ НАУКИ }}
+\vspace{-1\baselineskip}
+\section*{\centering{ \large КАФЕДРА «ВЫЧИСЛИТЕЛЬНАЯ МАТЕМАТИКА И МАТЕМАТИЧЕСКАЯ ФИЗИКА»}}
+
+\vspace{1\baselineskip}
+
+\section*{\centering \normalsize Направление: \fontseries{bx}\selectfont{Математика и компьютерные науки}}
+
+\vspace{1\baselineskip}
+
+\section*{\centering{ \normalsize Дисциплина: Численные методы}}
+
+\vspace{1\baselineskip}
+
+\section*{\centering{ \normalsize Домашняя работа \textnumero 1}}
+\vspace{-1\baselineskip}
+\section*{\centering{ \normalsize «Погрешности при решении СЛАУ»}}
+\vspace{-1\baselineskip}
+\section*{\centering{ \normalsize Группа ФН11-52Б}}
+
+\vspace{1\baselineskip}
+
+\section*{\centering{ \normalsize Вариант 9}}
+
+\vspace{1\baselineskip}
+
+\begin{flushright}
+    { \normalsize \textbf{Студент: Очкин Н. В. }}
+\end{flushright}
+
+\vspace{1\baselineskip}
+
+\begin{flushright}
+    { \normalsize \textbf{Преподаватель: Кутыркин В. А.}}
+\end{flushright}
+
+\vspace{1\baselineskip}
+
+\begin{flushright}
+    { \normalsize \textbf{Оценка: } \hspace{2.5cm} }
+\end{flushright}
+
+\vspace{2\baselineskip}
+
+\section*{\centering{ \normalsize Москва 2024}}
+
+\newpage
+
+% Задание 1.1
+
+\pagestyle{plain}
+\setcounter{page}{1}
+
+\section*{\centering{ \large Задание 1.1}}
+
+Дана СЛАУ ( $N$ – номер студента в журнале, $\alpha = \frac{n - 50}{100}$, где $n$ – номер группы):
+
+\begin{equation}
+    \begin{cases}
+        150(1 + 0.5 N + \alpha)x^1 + 150(1 + 0.5 N)x^2 + 150(1 + 0.5N)x^3 = 150(3 + 1.5N + \alpha);\\
+        150.1 \cdot (1 + 0.5 N)x^1 + 149.9 \cdot (1 + 0.5 N + \alpha)x^2 + 150(1 + 0.5N)x^3 = 150(3 + 1.5 N + \alpha);\\
+        149.9 \cdot (1 + 0.5N)x^1 + 150 \cdot (1 + 0.5 N)x^2 + 150.1 \cdot (1 + 0.5 N + \alpha)x^3 = 150 (3 + 1.5 N + \alpha);
+    \end{cases}
+\end{equation}
+
+Предполагается, что ошибка в матрице этой СЛАУ достаточно мала и относительная
+ошибка в её правой части равна 0,01. Приближённая СЛАУ имеет вид:
+
+\begin{equation}
+    \begin{cases}
+        150(1 + 0.5 N + \alpha)x^1 + 150(1 + 0.5 N)x^2 + 150(1 + 0.5N)x^3 = 150(3 + 1.5N + \alpha)(1 + 0.01);\\
+        150.1 \cdot (1 + 0.5 N)x^1 + 149.9 \cdot (1 + 0.5 N + \alpha)x^2 + 150(1 + 0.5N)x^3 = 150(3 + 1.5 N + \alpha)(1 - 0.01);\\
+        149.9 \cdot (1 + 0.5N)x^1 + 150 \cdot (1 + 0.5 N)x^2 + 150.1 \cdot (1 + 0.5 N + \alpha)x^3 = 150 (3 + 1.5 N + \alpha)(1 + 0.01);
+    \end{cases}
+\end{equation}
+
+Требуется найти число обусловленности матрицы рассматриваемой СЛАУ и
+относительную погрешность в решении приближённой СЛАУ. Затем, прокомментировать
+получившиеся результаты.
+
+\section*{\centering{ \large Решение}}
+
+Подставим $N = 9$ и $\alpha = \frac{52 - 50}{100} = 0.02$ в (1):
+
+\begin{equation}
+    \begin{cases}
+        828x^1 + 825x^2 + 825x^3 = 2478;\\
+        825.55x^1 + 827.448x^2 + 825x^3 = 2478;\\
+        824.45x^1 + 825x^2 + 828.552x^3 = 2478;
+    \end{cases}
+\end{equation}
+
+Матрица СЛАУ (1) имеет вид:
+
+\begin{equation}
+    A = \begin{pmatrix}
+        828    & 825     & 825 \\
+        825.55 & 827.448 & 825 \\
+        824.45 & 825     & 828.552
+    \end{pmatrix}
+\end{equation}
+
+\textbf{1. Найдем число обусловленности матрицы A.}
+
+Число обусловленности матрицы равно:
+
+\begin{equation}
+    \textrm{cond}(A) = \lVert A \rVert \cdot \lVert A^{-1} \rVert
+\end{equation}
+
+Вычислим обратную матрицу с помощью функции inv() библиотеки sympy:
+
+\begin{equation}
+    A^{-1} = \begin{pmatrix}
+        0.230115056512510   & -0.135989231310137 & -0.0937223080651046 \\ 
+        -0.178193673016471  & 0.272396398402827  & -0.0937988785782234 \\ 
+        -0.0515460443076003 & -0.135912660797018 & 0.187861995036292 
+    \end{pmatrix}
+\end{equation}
+
+Норма матрицы вычисляется по формуле:
+\begin{equation}
+    \lVert A \rVert = \textrm{max} \left\{ \sum_{j=1}^{n} |a^i_j|:i = \overline{1, n} \right\}
+\end{equation}
+
+% Для этого сначала вычислим матрицы, составленные из модулей элементов исходных
+% матриц, воспользовавшись функцией applyfunc(abs):
+
+% \begin{equation}
+%     |A| = \begin{pmatrix}
+%         828.000000000000 & 825.000000000000 & 825.000000000000 \\ 
+%         825.550000000000 & 827.448000000000 & 825.000000000000 \\ 
+%         824.450000000000 & 825.000000000000 & 828.552000000000 
+%     \end{pmatrix}
+% \end{equation}
+
+% \begin{equation}
+%     |A^{-1}| = \begin{pmatrix}
+%         0.230115056512510 & 0.135989231310137 & 0.0937223080651046 \\ 
+%         0.178193673016471 & 0.272396398402827 & 0.0937988785782234 \\ 
+%         0.0515460443076003 & 0.135912660797018 & 0.187861995036292 
+%     \end{pmatrix}
+% \end{equation}
+
+Вычислим нормы, воспользовавшись функцией norm():
+
+\begin{equation}
+    \lVert A \rVert      = 2478.00387699616 
+\end{equation}
+
+\begin{equation}
+    \lVert A^{-1} \rVert = 0.501400308248106
+\end{equation}
+
+Теперь вычислим число обусловленности матрицы:
+
+\begin{equation}
+    \textrm{cond}(A) = \lVert A \rVert \cdot \lVert A^{-1} \rVert = 2478.00387699616 \cdot 0.501400308248106 \approx 1242.47190776588
+\end{equation}
+
+Следовательно, СЛАУ (3) плохо обусловлена.
+
+\end{document}
