@@ -1,0 +1,670 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+\usepackage{../latexDependencies/misc/preamble2}
+
+\geometry{a4paper}
+
+% Название дисциплины
+\newcommand{\subject}{Численные методы} 
+
+% Тип работы
+% lab - для лабораторной работы 
+% hw  - для домашней     работы
+\newcommand{\task}{hw} 
+
+% Номер работы
+\newcommand{\taskNumber}{1-4} 
+
+% Название работы
+\newcommand{\taskNameOne}{Итерационный метод Якоби для полного решения задачи} 
+\newcommand{\taskNameTwo}{вычисления собственных значений и собственных} 
+\newcommand{\taskNameThree}{векторов квадратной симметричной матрицы} 
+
+% Имя студента
+\newcommand{\studentName}{Очкин Н.В.}
+
+% Имя преподававателя
+\newcommand{\teacherName}{Кутыркин В.А.}
+
+% Группа
+\newcommand{\group}{ФН11-52Б}
+
+% Вариант
+\newcommand{\variant}{9}
+
+\begin{document}
+
+\graphicspath{ {../latexDependencies/images} } 
+\input{../latexDependencies/frontmatter/titlepage2}
+
+\newgeometry{left=25mm, right=25mm, top=20mm, bottom=20mm}
+
+% \graphicspath{ {../latexDependencies/images/LW1} }
+
+% Customize subsection style
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% \thispagestyle{empty}
+
+% \null\newpage
+
+% \pagenumbering{roman}
+
+% \tableofcontents
+% \newpage
+
+% \pagenumbering{arabic}
+% \setcounter{page}{1}
+
+\setstretch{1}
+\linespread{1.1}
+
+\setlength{\parindent}{0pt}
+
+\fontsize{12pt}{16pt}\selectfont
+
+% --------------------------------------START--------------------------------------
+
+\subsection*{Задание}
+
+Используя метод Якоби, найти приближённое полное решение спектральной задачи для матрицы
+\textbf{\textit{A}}. Останов выбрать на том шаге итерации, когда максимальная по
+модулю внедиагональная компонента преобразованной матрицы станет меньше $\varepsilon$ = 0.01.
+Проверить найденные приближённые собственные векторы и отвечающие им собственные
+значения матрицы \textbf{\textit{A}} , проверив соответствующие приближённые равенства 
+$\textbf{\textit{A}} \cdot \upgt\tilde{\textbf{\textit{q}}_{i}} \approx \tilde{\lambda_i}
+ \cdot \upgt\tilde{\textbf{\textit{q}}_{i}} $ для любого $i \in \overline{1, 4}$
+ с указанием погрешности (отдельно показать вектор $\textbf{\textit{A}} \cdot 
+ \upgt\tilde{\textbf{\textit{q}}_{i}}$, отдельно вектор $\tilde{\lambda_i}
+ \cdot \upgt\tilde{\textbf{\textit{q}}_{i}}$ и, затем, вектор 
+ $\textbf{\textit{A}} \cdot \upgt\tilde{\textbf{\textit{q}}_{i}} - \tilde{\lambda_i}
+ \cdot \upgt\tilde{\textbf{\textit{q}}_{i}} $).
+
+\subsection*{Исходные данные}
+
+\begin{align*}
+  \textbf{\textit{A}} = \begin{pmatrix}
+    10.0 & -1.0 & 2.0 & 3.0 \\
+    -1.0 & 10.0 & -3.0 & 2.0 \\
+    2.0 & -3.0 & 10.0 & 1.0 \\
+    3.0 & 2.0 & 1.0 & 10.0 \\
+  \end{pmatrix}
+  \hspace{50pt}
+  \begin{aligned}
+    & N = & 9 \\
+    & n = & 52 \\
+    & \beta = & 1 \\
+    & \varepsilon = & 0.01
+  \end{aligned}
+\end{align*}
+
+\subsection*{Решение}
+
+Инициализируем матрицу собственных векторов \textbf{\textit{V}} как 
+единичную матрицу.
+
+\vspace{10pt}
+
+\begin{equation*}
+  \textbf{\textit{V}} = \begin{pmatrix}
+    1.0 & 0.0 & 0.0 & 0.0 \\
+    0.0 & 1.0 & 0.0 & 0.0 \\
+    0.0 & 0.0 & 1.0 & 0.0 \\
+    0.0 & 0.0 & 0.0 & 1.0 \\
+    \end{pmatrix}
+\end{equation*}
+
+\vspace{10pt}
+
+Подробно опишем первую итерацию алгоритма. \\
+{ \footnotesize \textbf{Примечание}: Индексация будет начинаться с нуля}.\\
+
+Для начала найдем максимальный по абсолютной величине недиагональный
+элемент $a_{ij}$ матрицы \textbf{\textit{A}}.
+
+\begin{equation*}
+  a_{ij} = 3, \quad i = 0, \quad j = 3
+\end{equation*}
+
+Теперь вычислим угол поворота $\theta$
+
+\begin{equation*}
+  \theta = \cfrac{1}{2} \arctan \left( \cfrac{2 a_{ij}}{a_{ii} - a_{jj}} \right) \approx
+  0.7854
+\end{equation*}
+
+Найдем также $\cos(\theta)$ и $\sin(\theta)$
+
+\begin{equation*}
+  \text{c} = \cos(\theta) = 0.70711, \qquad \text{s} = \sin(\theta) = 0.70711
+\end{equation*}
+
+Построим матрицу поворота \textbf{\textit{R}}, которая является единичной 
+матрицей с заменой элементов:
+
+\begin{equation*}
+  \textbf{\textit{R}}_{ii} = \textbf{\textit{R}}_{jj} = c, \quad \textbf{\textit{R}}_{ij} = -s, \quad \textbf{\textit{R}}_{ji} = s
+\end{equation*}
+
+\begin{equation*}
+  \textbf{\textit{R}} = \begin{pmatrix}
+    0.7071068 & 0.0 & 0.0 & -0.7071068 \\
+    0.0 & 1.0 & 0.0 & 0.0 \\
+    0.0 & 0.0 & 1.0 & 0.0 \\
+    0.7071068 & 0.0 & 0.0 & 0.7071068 \\
+    \end{pmatrix}
+\end{equation*}
+
+Обновим матрицу \textbf{\textit{A}} следующим образом:
+
+\begin{equation*}
+  \textbf{\textit{A}} \leftarrow \textbf{\textit{R}}^{\textbf{\textit{T}}} 
+  \textbf{\textit{A}} \textbf{\textit{R}}
+\end{equation*}
+
+Это приведет к аннулированию элемента $a_{ij}$ и изменению других элементов матрицы.
+
+\begin{equation*}
+  \textbf{\textit{A}} = \begin{pmatrix}
+    13.0 & 0.7071068 & 2.1213203 & 0.0 \\
+    0.7071068 & 10.0 & -3.0 & 2.1213203 \\
+    2.1213203 & -3.0 & 10.0 & -0.7071068 \\
+    -0.0 & 2.1213203 & -0.7071068 & 7.0 \\
+    \end{pmatrix}
+\end{equation*}
+
+Обновим также и матрицу собственных значений \textbf{\textit{V}}:
+
+\begin{equation*}
+  \textbf{\textit{V}} \leftarrow \textbf{\textit{V}} \textbf{\textit{R}}
+\end{equation*}
+
+\begin{equation*}
+  \textbf{\textit{V}} = \begin{pmatrix}
+    0.7071068 & 0.0 & 0.0 & -0.7071068 \\
+    0.0 & 1.0 & 0.0 & 0.0 \\
+    0.0 & 0.0 & 1.0 & 0.0 \\
+    0.7071068 & 0.0 & 0.0 & 0.7071068 \\
+    \end{pmatrix}
+\end{equation*}
+
+Проверим стала ли матрица \textbf{\textit{A}} диагональной с заданной точностью $\varepsilon$.\\
+Для проверки вычислим сумму квадратов всех недиагональных элементов матрицы:
+
+\begin{equation*}
+  S = \sum_{i \neq j} a_{ij}^2 \approx 38
+\end{equation*}
+
+Так как $38 > \varepsilon (0.01)$, то матрица \textbf{\textit{A}} не проходит проверку и мы вновь
+запускаем итерационный алгоритм.\\
+
+\newgeometry{left=10mm, right=10mm, top=10mm, bottom=20mm}
+
+\topskip0pt
+\vspace*{\fill}
+\begin{center}
+    \scalebox{0.75}{
+    \begin{minipage}{1.3\textwidth} 
+        \begin{multicols}{2}
+            \begin{gather*}
+                \textbf{Итерация 2} \\\\
+                a_{ij}: 3, \quad i: 1, \quad j: 2 \\
+                \theta: 0.7853982, \quad \text{c}: 0.7071068, \quad \text{s}: 0.7071068 \\\\
+                \begin{aligned}
+                  \textbf{\textit{R}} &= 
+                  &\begin{pmatrix}
+                    1.0 & 0.0 & 0.0 & 0.0 \\
+                    0.0 & 0.7071068 & -0.7071068 & 0.0 \\
+                    0.0 & 0.7071068 & 0.7071068 & 0.0 \\
+                    0.0 & 0.0 & 0.0 & 1.0 \\
+                  \end{pmatrix}\\[1.5em]
+                  \textbf{\textit{A}} &= 
+                  &\begin{pmatrix}
+                    13.0000007 & 2.0000001 & 1.0000001 & 0.0 \\
+                    2.0000001 & 7.0000004 & -0.0 & 1.0000001 \\
+                    1.0000001 & -0.0 & 13.0000007 & -2.0000001 \\
+                    0.0 & 1.0000001 & -2.0000001 & 7.0000004 \\
+                  \end{pmatrix}\\[1.5em]
+                  \textbf{\textit{V}} &= 
+                  &\begin{pmatrix}
+                    0.7071068 & 0.0 & 0.0 & -0.7071068 \\
+                    0.0 & 0.7071068 & -0.7071068 & 0.0 \\
+                    0.0 & 0.7071068 & 0.7071068 & 0.0 \\
+                    0.7071068 & 0.0 & 0.0 & 0.7071068 \\
+                  \end{pmatrix}\\
+                \end{aligned} \\\\
+                \text{S} \approx 20 > 0.01
+            \end{gather*}
+            \vspace{-3pt}
+            \begin{gather*}
+              \textbf{Итерация 3} \\\\
+              a_{ij}: 2, \quad i: 0, \quad j: 1 \\
+              \theta: 0.2940013, \quad \text{c}: 0.957092, \quad \text{s}: 0.2897841 \\\\
+              \begin{aligned}
+                \textbf{\textit{R}} &= 
+                &\begin{pmatrix}
+                  0.957092 & -0.2897841 & 0.0 & 0.0 \\
+                  0.2897841 & 0.957092 & 0.0 & 0.0 \\
+                  0.0 & 0.0 & 1.0 & 0.0 \\
+                  0.0 & 0.0 & 0.0 & 1.0 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{A}} &= 
+                &\begin{pmatrix}
+                  13.6055509 & 3e-07 & 0.9570921 & 0.2897841 \\
+                  3e-07 & 6.3944486 & -0.2897841 & 0.9570921 \\
+                  0.9570921 & -0.2897841 & 13.0000007 & -2.0000001 \\
+                  0.2897841 & 0.9570921 & -2.0000001 & 7.0000004 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{V}} &= 
+                &\begin{pmatrix}
+                  0.6767663 & -0.2049083 & 0.0 & -0.7071068 \\
+                  0.2049083 & 0.6767663 & -0.7071068 & 0.0 \\
+                  0.2049083 & 0.6767663 & 0.7071068 & 0.0 \\
+                  0.6767663 & -0.2049083 & 0.0 & 0.7071068 \\
+                \end{pmatrix}\\
+              \end{aligned} \\\\
+              \text{S} \approx 12 > 0.01
+          \end{gather*}
+        \end{multicols}
+    \end{minipage}
+    } 
+\end{center}
+\vspace*{\fill}
+\begin{center}
+  \scalebox{0.75}{
+  \begin{minipage}{1.3\textwidth} 
+      \begin{multicols}{2}
+          \begin{gather*}
+              \textbf{Итерация 4} \\\\
+              a_{ij}: 2, \quad i: 2, \quad j: 3 \\
+              \theta: 0.2940013, \quad \text{c}: 0.957092, \quad \text{s}: 0.2897841 \\\\
+              \begin{aligned}
+                \textbf{\textit{R}} &= 
+                &\begin{pmatrix}
+                  1.0 & 0.0 & 0.0 & 0.0 \\
+                  0.0 & 1.0 & 0.0 & 0.0 \\
+                  0.0 & 0.0 & 0.957092 & -0.2897841 \\
+                  0.0 & 0.0 & 0.2897841 & 0.957092 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{A}} &= 
+                &\begin{pmatrix}
+                  13.6055509 & 3e-07 & 1.0 & -0.0 \\
+                  3e-07 & 6.3944486 & 0.0 & 1.0 \\
+                  1.0 & 0.0 & 11.3867505 & -3.328201 \\
+                  -0.0 & 1.0 & -3.328201 & 8.6132491 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{V}} &= 
+                &\begin{pmatrix}
+                  0.6767663 & -0.2049083 & -0.2049083 & -0.6767663 \\
+                  0.2049083 & 0.6767663 & -0.6767663 & 0.2049083 \\
+                  0.2049083 & 0.6767663 & 0.6767663 & -0.2049083 \\
+                  0.6767663 & -0.2049083 & 0.2049083 & 0.6767663 \\
+                \end{pmatrix}\\
+              \end{aligned} \\\\
+              \text{S} \approx 26 > 0.01
+          \end{gather*}
+          \vspace{-3pt}
+          \begin{gather*}
+            \textbf{Итерация 5} \\\\
+            a_{ij}: 3.328201, \quad i: 2, \quad j: 3 \\
+            \theta: 0.5880026, \quad \text{c}: 0.8320503, \quad \text{s}: 0.5547002 \\\\
+            \begin{aligned}
+              \textbf{\textit{R}} &= 
+              &\begin{pmatrix}
+                1.0 & 0.0 & 0.0 & 0.0 \\
+                0.0 & 1.0 & 0.0 & 0.0 \\
+                0.0 & 0.0 & 0.8320503 & -0.5547002 \\
+                0.0 & 0.0 & 0.5547002 & 0.8320503 \\
+              \end{pmatrix}\\[1.5em]
+              \textbf{\textit{A}} &= 
+              &\begin{pmatrix}
+                13.6055509 & 3e-07 & 0.8320503 & -0.5547002 \\
+                3e-07 & 6.3944486 & 0.5547002 & 0.8320503 \\
+                0.8320503 & 0.5547002 & 7.46118 & -2.5601549 \\
+                -0.5547002 & 0.8320503 & -2.5601549 & 12.5388199 \\
+              \end{pmatrix}\\[1.5em]
+              \textbf{\textit{V}} &= 
+              &\begin{pmatrix}
+                0.6767663 & -0.2049083 & -0.5458964 & -0.4494409 \\
+                0.2049083 & 0.6767663 & -0.4494409 & 0.5458964 \\
+                0.2049083 & 0.6767663 & 0.4494409 & -0.5458964 \\
+                0.6767663 & -0.2049083 & 0.5458964 & 0.4494409 \\
+              \end{pmatrix}\\
+            \end{aligned} \\\\
+            \text{S} \approx 17.109 > 0.01
+        \end{gather*}
+      \end{multicols}
+  \end{minipage}
+  } 
+\end{center}
+\vspace*{\fill}
+
+\newpage
+
+\topskip0pt
+\vspace*{\fill}
+\begin{center}
+    \scalebox{0.75}{
+    \begin{minipage}{1.3\textwidth} 
+        \begin{multicols}{2}
+            \begin{gather*}
+                \textbf{Итерация 6} \\\\
+                a_{ij}: 2.5601549, \quad i: 2, \quad j: 3 \\
+                \theta: -0.3947912, \quad \text{c}: 0.9230769, \quad \text{s}: -0.3846154 \\\\
+                \begin{aligned}
+                  \textbf{\textit{R}} &= 
+                  &\begin{pmatrix}
+                    1.0 & 0.0 & 0.0 & 0.0 \\
+                    0.0 & 1.0 & 0.0 & 0.0 \\
+                    0.0 & 0.0 & 0.9230769 & 0.3846154 \\
+                    0.0 & 0.0 & -0.3846154 & 0.9230769 \\
+                  \end{pmatrix}\\[1.5em]
+                  \textbf{\textit{A}} &= 
+                  &\begin{pmatrix}
+                    13.6055509 & 3e-07 & 0.9813927 & -0.1920116 \\
+                    3e-07 & 6.3944486 & 0.1920116 & 0.9813927 \\
+                    0.9813927 & 0.1920116 & 10.0301715 & -3.6054249 \\
+                    -0.1920116 & 0.9813927 & -3.6054249 & 9.9698278 \\
+                  \end{pmatrix}\\[1.5em]
+                  \textbf{\textit{V}} &= 
+                  &\begin{pmatrix}
+                    0.6767663 & -0.2049083 & -0.3310425 & -0.6248287 \\
+                    0.2049083 & 0.6767663 & -0.6248287 & 0.3310425 \\
+                    0.2049083 & 0.6767663 & 0.6248287 & -0.3310425 \\
+                    0.6767663 & -0.2049083 & 0.3310425 & 0.6248287 \\
+                  \end{pmatrix}\\
+                \end{aligned} \\\\
+                \text{S} \approx 29.998 > 0.01
+            \end{gather*}
+            \vspace{-3pt}
+            \begin{gather*}
+              \textbf{Итерация 7} \\\\
+              a_{ij}: 3.6, \quad i: 2, \quad j: 3 \\
+              \theta: 0.781214, \quad \text{c}: 0.7100592, \quad \text{s}: 0.704142 \\\\
+              \begin{aligned}
+                \textbf{\textit{R}} &= 
+                &\begin{pmatrix}
+                  1.0 & 0.0 & 0.0 & 0.0 \\
+                  0.0 & 1.0 & 0.0 & 0.0 \\
+                  0.0 & 0.0 & 0.7100592 & -0.704142 \\
+                  0.0 & 0.0 & 0.704142 & 0.7100592 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{A}} &= 
+                &\begin{pmatrix}
+                  13.6055509 & 3e-07 & 0.5616435 & -0.8273794 \\
+                  3e-07 & 6.3944486 & 0.8273794 & 0.5616435 \\
+                  0.5616435 & 0.8273794 & 6.3949536 & -0.0603414 \\
+                  -0.8273794 & 0.5616435 & -0.0603414 & 13.6050462 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{V}} &= 
+                &\begin{pmatrix}
+                  0.6767663 & -0.2049083 & -0.6750279 & -0.2105644 \\
+                  0.2049083 & 0.6767663 & -0.2105644 & 0.6750279 \\
+                  0.2049083 & 0.6767663 & 0.2105644 & -0.6750279 \\
+                  0.6767663 & -0.2049083 & 0.6750279 & 0.2105644 \\
+                \end{pmatrix}\\
+              \end{aligned} \\\\
+              \text{S} \approx 4 > 0.01
+          \end{gather*}
+        \end{multicols}
+    \end{minipage}
+    } 
+\end{center}
+\vspace*{\fill}
+\begin{center}
+  \scalebox{0.75}{
+  \begin{minipage}{1.3\textwidth} 
+      \begin{multicols}{2}
+          \begin{gather*}
+              \textbf{Итерация 8} \\\\
+              a_{ij}: 0.827, \quad i: 0, \quad j: 3 \\
+              \theta: 0.7852457, \quad \text{c}: 0.7072146, \quad \text{s}: 0.7069989 \\\\
+              \begin{aligned}
+                \textbf{\textit{R}} &= 
+                &\begin{pmatrix}
+                  0.7072146 & 0.0 & 0.0 & -0.7069989 \\
+                  0.0 & 1.0 & 0.0 & 0.0 \\
+                  0.0 & 0.0 & 1.0 & 0.0 \\
+                  0.7069989 & 0.0 & 0.0 & 0.7072146 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{A}} &= 
+                &\begin{pmatrix}
+                  12.7779184 & 0.3970815 & 0.3545412 & -0.0005047 \\
+                  0.3970815 & 6.3944486 & 0.8273794 & 0.3972023 \\
+                  0.3545412 & 0.8273794 & 6.3949536 & -0.4397557 \\
+                  -0.0005047 & 0.3972023 & -0.4397557 & 14.4326769 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{V}} &= 
+                &\begin{pmatrix}
+                  0.3297502 & -0.2049083 & -0.6750279 & -0.6273872 \\
+                  0.6221581 & 0.6767663 & -0.2105644 & 0.3325196 \\
+                  -0.3323298 & 0.6767663 & 0.2105644 & -0.6222595 \\
+                  0.6274878 & -0.2049083 & 0.6750279 & -0.3295588 \\
+                \end{pmatrix}\\
+              \end{aligned} \\\\
+              \text{S} \approx 2.638 > 0.01
+          \end{gather*}
+          \vspace{-3pt}
+          \begin{gather*}
+            \textbf{Итерация 9} \\\\
+            a_{ij}: 0.827, \quad i: 1, \quad j: 2 \\
+            \theta: -0.7852456, \quad \text{c}: 0.7072147, \quad \text{s}: -0.7069989 \\\\
+            \begin{aligned}
+              \textbf{\textit{R}} &= 
+              &\begin{pmatrix}
+                1.0 & 0.0 & 0.0 & 0.0 \\
+                0.0 & 0.7072147 & 0.7069989 & 0.0 \\
+                0.0 & -0.7069989 & 0.7072147 & 0.0 \\
+                0.0 & 0.0 & 0.0 & 1.0 \\
+              \end{pmatrix}\\[1.5em]
+              \textbf{\textit{A}} &= 
+              &\begin{pmatrix}
+                12.7779184 & 0.0301616 & 0.5314729 & -0.0005047 \\
+                0.0301616 & 5.5673221 & 0.0 & 0.5918141 \\
+                0.5314729 & 0.0 & 7.2220811 & -0.0301801 \\
+                -0.0005047 & 0.5918141 & -0.0301801 & 14.4326769 \\
+              \end{pmatrix}\\[1.5em]
+              \textbf{\textit{V}} &= 
+              &\begin{pmatrix}
+                0.3297502 & 0.3323298 & -0.6222596 & -0.6273872 \\
+                0.6221581 & 0.6274879 & 0.3295588 & 0.3325196 \\
+                -0.3323298 & 0.3297503 & 0.6273873 & -0.6222595 \\
+                0.6274878 & -0.6221581 & 0.3325197 & -0.3295588 \\
+              \end{pmatrix}\\
+            \end{aligned} \\\\
+            \text{S} \approx 1.269 > 0.01
+        \end{gather*}
+      \end{multicols}
+  \end{minipage}
+  } 
+\end{center}
+\vspace*{\fill}
+
+\newpage
+
+\begin{center}
+    \scalebox{0.75}{
+    \begin{minipage}{1.3\textwidth} 
+        \begin{multicols}{2}
+            \begin{gather*}
+                \textbf{Итерация 10} \\\\
+                a_{ij}: 0.5918, \quad i: 1, \quad j: 3 \\
+                \theta: -0.0663634, \quad \text{c}: 0.9977988, \quad \text{s}: -0.0663147 \\\\
+                \begin{aligned}
+                  \textbf{\textit{R}} &= 
+                  &\begin{pmatrix}
+                    1.0 & 0.0 & 0.0 & 0.0 \\
+                    0.0 & 0.9977988 & 0.0 & 0.0663147 \\
+                    0.0 & 0.0 & 1.0 & 0.0 \\
+                    0.0 & -0.0663147 & 0.0 & 0.9977988 \\
+                  \end{pmatrix}\\[1.5em]
+                  \textbf{\textit{A}} &= 
+                  &\begin{pmatrix}
+                    12.7779184 & 0.0301287 & 0.5314729 & 0.0014966 \\
+                    0.0301287 & 5.52799 & 0.0020014 & -3e-07 \\
+                    0.5314729 & 0.0020014 & 7.2220811 & -0.0301137 \\
+                    0.0014966 & -3e-07 & -0.0301137 & 14.4720107 \\
+                  \end{pmatrix}\\[1.5em]
+                  \textbf{\textit{V}} &= 
+                  &\begin{pmatrix}
+                    0.3297502 & 0.3732033 & -0.6222596 & -0.6039678 \\
+                    0.6221581 & 0.6040557 & 0.3295588 & 0.3733993 \\
+                    -0.3323298 & 0.3702894 & 0.6273873 & -0.5990225 \\
+                    0.6274878 & -0.598934 & 0.3325197 & -0.3700916 \\
+                  \end{pmatrix}\\
+                \end{aligned} \\\\
+                \text{S} \approx 0.569 > 0.01
+            \end{gather*}
+            \vspace{-3pt}
+            \begin{gather*}
+              \textbf{Итерация 11} \\\\
+              a_{ij}: 0.5315, \quad i: 0, \quad j: 2 \\
+              \theta: 0.0945181, \quad \text{c}: 0.9955365, \quad \text{s}: 0.0943774 \\\\
+              \begin{aligned}
+                \textbf{\textit{R}} &= 
+                &\begin{pmatrix}
+                  0.9955365 & 0.0 & -0.0943774 & 0.0 \\
+                  0.0 & 1.0 & 0.0 & 0.0 \\
+                  0.0943774 & 0.0 & 0.9955365 & 0.0 \\
+                  0.0 & 0.0 & 0.0 & 1.0 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{A}} &= 
+                &\begin{pmatrix}
+                  12.8283025 & 0.0301831 & 1e-07 & -0.0013521 \\
+                  0.0301831 & 5.52799 & -0.000851 & -3e-07 \\
+                  1e-07 & -0.000851 & 7.1716973 & -0.0301205 \\
+                  -0.0013521 & -3e-07 & -0.0301205 & 14.4720107 \\
+                \end{pmatrix}\\[1.5em]
+                \textbf{\textit{V}} &= 
+                &\begin{pmatrix}
+                  0.2695511 & 0.3732033 & -0.6506031 & -0.6039678 \\
+                  0.650484 & 0.6040557 & 0.2693702 & 0.3733993 \\
+                  -0.2716353 & 0.3702894 & 0.6559514 & -0.5990225 \\
+                  0.6560694 & -0.598934 & 0.2718148 & -0.3700916 \\
+                \end{pmatrix}\\
+              \end{aligned} \\\\
+              \text{S} \approx 0.00364 < 0.01
+          \end{gather*}
+        \end{multicols}
+    \end{minipage}
+    } 
+\end{center}
+
+\vspace{30pt}
+
+\hspace{5mm} Итого мы получили следующие две матрицы\\[-1em]
+
+\scalebox{0.75}{
+  \begin{minipage}{1.3\textwidth} 
+    \begin{equation}
+        \textbf{\textit{A}} = \begin{pmatrix}
+          12.8283025 & 0.0301831 & 1e-07 & -0.0013521 \\
+          0.0301831 & 5.52799 & -0.000851 & -3e-07 \\
+          1e-07 & -0.000851 & 7.1716973 & -0.0301205 \\
+          -0.0013521 & -3e-07 & -0.0301205 & 14.4720107 \\
+        \end{pmatrix} \qquad
+        \textbf{\textit{V}} = \begin{pmatrix}
+          0.2695511 & 0.3732033 & -0.6506031 & -0.6039678 \\
+          0.650484 & 0.6040557 & 0.2693702 & 0.3733993 \\
+          -0.2716353 & 0.3702894 & 0.6559514 & -0.5990225 \\
+          0.6560694 & -0.598934 & 0.2718148 & -0.3700916 \\
+          \end{pmatrix}
+    \end{equation}
+  \end{minipage}
+}\\
+
+\vspace{10pt}
+
+\hspace{5mm} где диагональные элементы матрицы \textbf{\textit{A}} являются 
+собственными значениями исходной, \\\null
+\hspace{5mm} а столбцы матрицы \textbf{\textit{V}} - собственные вектора.\\
+
+\hspace{5mm} Проведем проверку.
+\begin{center}
+  \scalebox{0.88}{
+    \begin{minipage}{1.1\textwidth} 
+      \begin{multicols}{4}
+          \begin{align*}
+            & \textbf{\textit{A}} \cdot \upgt q_0 = \begin{pmatrix}
+                3.4699646  \\
+                8.3623336  \\
+                -3.4726334 \\
+                8.39868    \\
+              \end{pmatrix} \\\\
+            & \lambda_0 \cdot \upgt q_0 = \begin{pmatrix}
+              3.45788305 \\
+               8.34460552 \\
+              -3.4846198 \\
+                8.41625672
+              \end{pmatrix}
+          \end{align*}
+
+          \vspace{-3pt}
+
+          \begin{align*}
+            & \textbf{\textit{A}} \cdot \upgt q_1 = \begin{pmatrix}
+              2.0717541 \\
+               3.3586175 \\
+               2.0381995 \\
+              -3.2913293
+              \end{pmatrix} \\\\
+            & \lambda_1 \cdot \upgt q_1 = \begin{pmatrix}
+              2.06306411 \\
+               3.33921387 \\
+               2.0469561 \\
+               -3.31090116
+              \end{pmatrix}
+          \end{align*}
+
+          \vspace{-3pt}
+
+          \begin{align*}
+            & \textbf{\textit{A}} \cdot \upgt q_2 = \begin{pmatrix}
+              -4.648054 \\
+                1.9200805 \\
+               4.722012 \\
+                1.9610305
+              \end{pmatrix} \\\\
+            & \lambda_2 \cdot \upgt q_2 = \begin{pmatrix}
+              -4.6659285 \\
+                1.93184154 \\
+               4.70428488 \\
+               1.94937347
+              \end{pmatrix}
+          \end{align*}
+
+          \vspace{-3pt}
+
+          \begin{align*}
+            & \textbf{\textit{A}} \cdot \upgt q_3 = \begin{pmatrix}
+              -8.7213971 \\
+               5.3948451 \\
+              -8.6884501 \\
+              -5.3650433
+              \end{pmatrix} \\\\
+            & \lambda_3 \cdot \upgt q_3 = \begin{pmatrix}
+              -8.74062846 \\
+               5.40383866 \\
+              -8.66906003 \\
+              -5.3559696
+              \end{pmatrix}
+          \end{align*}
+      \end{multicols}
+    \end{minipage}
+  }
+\end{center}
+\vspace{10pt}
+\hspace{5mm} Проверка сходится
+
+\newgeometry{left=25mm, right=25mm, top=20mm, bottom=20mm}
+
+\subsection*{Вывод}
+
+Используя метод Якоби найдено приближённое решение спектральной задачи матрицы \textbf{\textit{A}}. 
+Приближённые собственные значения данной матрицы стоят на главной диагонали преобразованной матрицы
+\textbf{\textit{A}} (1). Собственными векторами являются столбцы преобразованной матрицы 
+\textbf{\textit{V}} (1). При проверке соответствующих приближённых равенств погрешность
+вышла равной заданной ($\varepsilon = 0.01$).
+
+\end{document}
