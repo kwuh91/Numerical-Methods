@@ -1,0 +1,112 @@
+\documentclass[a4paper, 14pt]{extarticle}
+
+\usepackage{../latexDependencies/misc/preamble2}
+
+\geometry{a4paper}
+
+% Название дисциплины
+\newcommand{\subject}{Численные методы} 
+
+% Тип работы
+% lab - для лабораторной работы 
+% hw  - для домашней     работы
+\newcommand{\task}{hw} 
+
+% Номер работы
+\newcommand{\taskNumber}{2-1} 
+
+% Название работы
+\newcommand{\taskNameOne}{Интерполяция Лагранжа.} 
+\newcommand{\taskNameTwo}{Вычисление интерполяционного полинома} 
+\newcommand{\taskNameThree}{Лагранжа.} 
+
+% Имя студента
+\newcommand{\studentName}{Очкин Н.В.}
+
+% Имя преподававателя
+\newcommand{\teacherName}{Кутыркин В.А.}
+
+% Группа
+\newcommand{\group}{ФН11-52Б}
+
+% Вариант
+\newcommand{\variant}{9}
+
+\begin{document}
+
+\graphicspath{ {../latexDependencies/images} } 
+\input{../latexDependencies/frontmatter/titlepage2}
+
+\newgeometry{left=25mm, right=25mm, top=20mm, bottom=20mm}
+
+\graphicspath{ {../latexDependencies/images/HW2-1} }
+
+% Customize section, subsection, subsubsection and paragraph styles
+\titleformat{\section}
+  {\normalfont\large\bfseries}{\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\small\bfseries}{\thesubsubsection}{1em}{}
+
+\titleformat{\paragraph}
+  {\small\small\bfseries}{\theparagraph}{1em}{}
+
+% \thispagestyle{empty}
+
+% \null\newpage
+
+% \setcounter{tocdepth}{5}
+% \setcounter{secnumdepth}{5}
+
+% \pagenumbering{roman}
+
+% \tableofcontents
+% \newpage
+
+% \pagenumbering{arabic}
+% \setcounter{page}{1}
+
+\setstretch{1}
+\linespread{1.1}
+
+\setlength{\parindent}{0pt}
+
+\fontsize{12pt}{16pt}\selectfont
+
+% \definecolor{myblue}{HTML}{0A88C2}
+% \definecolor{myred}{HTML}{FF1B1C}
+% \definecolor{mygreen}{HTML}{386641}
+
+% \lstdefinestyle{mystyle}{
+%     basicstyle=\ttfamily\footnotesize,
+%     keywordstyle=\color{myblue},
+%     stringstyle=\color{myred},
+%     commentstyle=\color{green!50!black},
+%     showstringspaces=false,
+%     frame=leftline, 
+%     framesep=10pt, 
+% }
+
+% % Set the style for Python code
+% \lstset{style=mystyle, extendedchars=\true}
+
+% --------------------------------------START--------------------------------------
+
+\section*{Задание}\vspace{-20pt}\rule{\linewidth}{0.1mm}
+
+\begin{equation*}
+    \begin{cases}
+        a_0 + b_0 (x - x_0) + c_0 (x - x_0)^2 + d_0 (x - x_0)^3, & x \in [x_0, x_1] \\ 
+        a_1 + b_1 (x - x_1) + c_1 (x - x_1)^2 + d_1 (x - x_1)^3, & x \in [x_1, x_2] \\ 
+        \vdots \\ 
+        a_{n-2} + b_{n-2} (x - x_{n-2}) + c_{n-2} (x - x_{n-2})^2 + d_{n-2} (x - x_{n-2})^3, & x \in [x_{n-2}, x_{n-1}] 
+    \end{cases}   
+\end{equation*}
+
+Таким образом, для записи функции естественного кубического сплайна дефекта 1 вам нужно просто подставить найденные коэффициенты $ a_i, b_i, c_i, d_i $ в 
+вышеуказанную формулу для каждого интервала $[x_i, x_{i+1}]$.
+
+\end{document}
